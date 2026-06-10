@@ -1,0 +1,147 @@
+
+
+---
+
+**Prompt:**
+
+Write a complete C program for a menu-driven 2D graphics editor that draws shapes on a character-based canvas. Follow every detail below exactly.
+
+---
+
+### **Headers and Macros**
+- Include `<stdio.h>` and `<math.h>`
+- Define two macros: `ROWS` as `30` and `COLS` as `60`
+
+---
+
+### **Global Variable**
+- Declare a single global 2D char array: `char canvas[ROWS][COLS]`
+
+---
+
+### **Function Prototypes**
+Declare all of the following prototypes before `main()`, in this exact order:
+```
+void initializeCanvas();
+void displayCanvas();
+void drawRectangle(int x, int y, int width, int height);
+void drawLine(int x1, int y1, int x2, int y2);
+void drawTriangle(int x, int y, int height);
+void drawCircle(int xc, int yc, int r);
+void deleteRectangle(int x, int y, int width, int height);
+```
+
+---
+
+### **`main()` Function**
+- Declare `int choice`
+- Call `initializeCanvas()` once at the start
+- Run an infinite `while(1)` loop
+- Print this exact menu every iteration:
+```
+===== 2D GRAPHICS EDITOR =====
+1. Draw Rectangle
+2. Draw Line
+3. Draw Triangle
+4. Draw Circle
+5. Delete Rectangle
+6. Display Canvas
+7. Exit
+```
+- Prompt `"Enter choice: "` and read into `choice` using `scanf`
+- Use a `switch` statement on `choice` with cases 1–7 and a `default`
+- Each case (except 6 and 7) declares its own local variables inside a `{}` block, prompts for input, reads with `scanf`, and calls the corresponding function
+- **Case 1:** declare `int x,y,w,h`, prompt `"Enter x y width height: "`, call `drawRectangle(x,y,w,h)`
+- **Case 2:** declare `int x1,y1,x2,y2`, prompt `"Enter x1 y1 x2 y2: "`, call `drawLine(x1,y1,x2,y2)`
+- **Case 3:** declare `int x,y,h`, prompt `"Enter top vertex (x y) and height: "`, call `drawTriangle(x,y,h)`
+- **Case 4:** declare `int xc,yc,r`, prompt `"Enter center(x y) and radius: "`, call `drawCircle(xc,yc,r)`
+- **Case 5:** declare `int x,y,w,h`, prompt `"Enter rectangle position and size: "`, call `deleteRectangle(x,y,w,h)`
+- **Case 6:** directly call `displayCanvas()` with no extra variables
+- **Case 7:** execute `return 0`
+- **Default:** print `"Invalid Choice!\n"`
+- After the `while` loop, include a final `return 0`
+
+---
+
+### **`initializeCanvas()` Function**
+- Add comment `/* Initialize canvas */`
+- Declare `int i,j` at the top
+- Use nested `for` loops: outer loop `i` from `0` to `ROWS`, inner loop `j` from `0` to `COLS`
+- Assign `canvas[i][j] = '_'` inside the inner loop
+
+---
+
+### **`displayCanvas()` Function**
+- Add comment `/* Display canvas */`
+- Declare `int i,j` at the top
+- Print `"\n"` before the loops
+- Use nested `for` loops: outer `i` from `0` to `ROWS`, inner `j` from `0` to `COLS`
+- Print each character using `printf("%c", canvas[i][j])`
+- After the inner loop, print `"\n"` to end each row
+
+---
+
+### **`drawRectangle()` Function**
+- Add comment `/* Draw Rectangle */`
+- Declare `int i,j` at the top
+- Use nested `for` loops: outer `i` from `y` to `y+height` with bound check `i<ROWS`, inner `j` from `x` to `x+width` with bound check `j<COLS`
+- Inside the loop, use this exact `if` condition to only draw the border:
+```c
+if(i==y || i==y+height-1 || j==x || j==x+width-1)
+```
+- Set `canvas[i][j] = '*'` when the condition is true
+
+---
+
+### **`drawLine()` Function — DDA Algorithm**
+- Add comment `/* Draw Line using DDA */`
+- Declare `int dx`, `int dy`, `int steps`, `float xinc`, `float yinc`, `float x`, `float y`, `int i` — all as separate declarations at the top
+- Compute `dx = x2-x1` and `dy = y2-y1`
+- Compute `steps` as `abs(dx)>abs(dy) ? abs(dx) : abs(dy)`
+- Compute `xinc = (float)dx/steps` and `yinc = (float)dy/steps`
+- Initialize `float x = x1` and `float y = y1`
+- Loop `i` from `0` to `steps` (inclusive)
+- Inside the loop, check bounds: `(int)y >= 0 && (int)y < ROWS && (int)x >= 0 && (int)x < COLS`
+- Set `canvas[(int)y][(int)x] = '*'`
+- Increment: `x += xinc` and `y += yinc`
+
+---
+
+### **`drawTriangle()` Function**
+- Add comment `/* Draw Triangle */`
+- Declare `int i` at the top (even if unused)
+- Make exactly three `drawLine()` calls:
+  - Left side: from `(x, y)` to `(x-height, y+height)`
+  - Right side: from `(x, y)` to `(x+height, y+height)`
+  - Base: from `(x-height, y+height)` to `(x+height, y+height)`
+
+---
+
+### **`drawCircle()` Function**
+- Add comment `/* Draw Circle */`
+- Declare `int x, y` at the top
+- Use nested `for` loops: outer `y` from `0` to `ROWS`, inner `x` from `0` to `COLS`
+- Inside the loop, declare `int d = (x-xc)*(x-xc) + (y-yc)*(y-yc)`
+- Use the condition `abs(d - r*r) <= r` to determine if the cell is on the circle boundary
+- Set `canvas[y][x] = '*'` when true
+
+---
+
+### **`deleteRectangle()` Function**
+- Add comment `/* Delete Rectangle */`
+- Declare `int i,j` at the top
+- Use nested `for` loops: outer `i` from `y` to `y+height` with bound check `i<ROWS`, inner `j` from `x` to `x+width` with bound check `j<COLS`
+- Set `canvas[i][j] = '_'` for **every** cell in the region (no border condition — fill the entire rectangle including interior)
+
+---
+
+### **Code Style Rules**
+- All loop variables declared at the top of their function, not inline in the `for` statement
+- No spaces between function arguments in `scanf` format strings — use `"%d%d%d%d"` not `"%d %d %d %d"`
+- Each function preceded by its comment block using `/* */` style
+- Consistent indentation throughout
+- No use of `bool`, `stdbool.h`, or any other extra headers beyond `<stdio.h>` and `<math.h>`
+
+---
+
+This prompt contains every algorithmic, structural, naming, and stylistic detail needed to reproduce the code exactly.
